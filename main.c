@@ -1,5 +1,7 @@
 #include <stdio.h> 
 #include <stdlib.h>
+#include <string.h>
+
 #define  NUM 10000000
 #define _GNU_SOURCE
 
@@ -9,47 +11,71 @@ void quicksort(int *data, int left, int right);
 void swap(int *a, int *b);
 
 void FastQuickSort(int *data, int left, int right);
+/*
+int* partition(int *data, int left, int right, int line){
+	int i, j;
+	
+	int *out_data = (int *) malloc(NUM/8*sizeof(int));
+	for(i=left;i<right;i++)
+    {
+        if(data[i]>NUM/2) partition[]
+    }   
+	
+}*/
 
 int main(void)
 {
-
-	FILE *fp;
+	//int data[NUM];
+    //char s_data[NUM];
        
     int *data = (int *) malloc(NUM*sizeof(int));
 	char *s_data = (char *) malloc(NUM*sizeof(char));
-	
+	char* buffer= (char *) malloc(NUM*sizeof(char));
+	char* ptr= (char *) malloc(NUM*sizeof(char));
     int i, n, j=0;
     
-    //int data[NUM];
-    //char s_data[NUM];
-    
+	//*****input txt  Start*****//    
+  /*  FILE *fp;
     fp=fopen("input.txt","r");
-if(fp==NULL){
-	printf("Open file error\n");
-	return 0;
+	if(fp==NULL){
+		printf("Open file error\n");
+		return 0;
     }
-
-while (fscanf(fp, "%s",&s_data[j])!=EOF){
-	data[j]=atoi(&s_data[j]);
-	j++;
-   }
-
-fclose(fp);
+	while (fscanf(fp, "%s",&s_data[j])!=EOF){
+		data[j]=atoi(&s_data[j]);
+		j++;
+   	}
+	fclose(fp);*/
+	//*****input txt  Exit*****//
+	
+	//*****input txt  Start*****//    
+	FILE *fp;
+    fp=fopen("input.txt","r");
+	while(fgets(buffer, NUM, fp)!=NULL) {
+    	ptr = buffer; data[j++] = atoi(ptr);
+    	while( (ptr = strchr(ptr, ' '))!=NULL && *(ptr+1)!='\n') {
+      	 	data[j++] = atoi(ptr++);
+    	}
+	}
+	fclose(fp);
+	//*****input txt  Exit*****//  
 
     // 執行快速排序法
     //quicksort(data, 0, j - 1);
     FastQuickSort(data, 0, j - 1);
     
-	/*//output print  Start
+    //*****output print  Start*****//
+	/*
     printf("\n排序後的結果: ");
     for (i = 0; i < j; i++)
     {
         printf("%d ", data[i]);
     }    
 	printf("\n");
-	*///output print  Exit
-
-	//output txt  Start
+	*/
+	//*****output print  Exit*****//
+	
+	//*****output txt  Start*****//
    	FILE *fw;
     int k;
     if((fw=fopen("result.txt","w"))!=NULL)
@@ -60,7 +86,7 @@ fclose(fp);
          }   
     }
     fclose(fw);
-    //output txt  Exit
+    //*****output txt  Exit*****//
     
     system("pause");
 }
