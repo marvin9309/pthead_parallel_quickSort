@@ -2,63 +2,122 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define  NUM 10000000
 #define _GNU_SOURCE
 
-
-void print_infor(int *data);
-void quicksort(int *data, int left, int right);
 void swap(int *a, int *b);
-
 void FastQuickSort(int *data, int left, int right);
-/*
-int* partition(int *data, int left, int right, int line){
-	int i, j;
+
+void dataPatition (int *data, int *data_a, int *data_b, int left, int right, int middle){
+	int o = 0, p = 0;
+	int q;
 	
-	int *out_data = (int *) malloc(NUM/8*sizeof(int));
-	for(i=left;i<right;i++)
-    {
-        if(data[i]>NUM/2) partition[]
-    }   
-	
-}*/
+	for(q = left; q < right; q++){
+		if(data[q] > data[middle]){
+			data_b[o++] = data[q];
+		}
+		else{
+			data_a[p++] = data[q];
+		}
+	}
+}
 
 int main(void)
 {
-	//int data[NUM];
-    //char s_data[NUM];
-       
-    int *data = (int *) malloc(NUM*sizeof(int));
-	char *s_data = (char *) malloc(NUM*sizeof(char));
-	char* buffer= (char *) malloc(NUM*sizeof(char));
-	char* ptr= (char *) malloc(NUM*sizeof(char));
-    int i, n, j=0;
+	char* buffer= (char *) malloc(20*sizeof(char));
+	char* ptr= (char *) malloc(20*sizeof(char));
+    int i, j=0, l, m, n;
+    long WNUM, NUM;
     
-	//*****input txt  Start*****//    
-  /*  FILE *fp;
-    fp=fopen("input.txt","r");
-	if(fp==NULL){
-		printf("Open file error\n");
-		return 0;
-    }
-	while (fscanf(fp, "%s",&s_data[j])!=EOF){
-		data[j]=atoi(&s_data[j]);
-		j++;
-   	}
-	fclose(fp);*/
-	//*****input txt  Exit*****//
+
 	
 	//*****input txt  Start*****//    
 	FILE *fp;
-    fp=fopen("input.txt","r");
-	while(fgets(buffer, NUM, fp)!=NULL) {
+    fp=fopen("data2.txt","r");
+    
+  	while(fgets(buffer, 10, fp)!=NULL) ++WNUM;
+	printf("%d",WNUM);
+	NUM = WNUM;
+    rewind(fp);
+
+    int *data = (int *) malloc(WNUM*sizeof(int));
+    int *buff = (int *) malloc(WNUM/4*sizeof(int));
+
+	while(fgets(buffer, 10, fp)!=NULL) {
     	ptr = buffer; data[j++] = atoi(ptr);
     	while( (ptr = strchr(ptr, ' '))!=NULL && *(ptr+1)!='\n') {
       	 	data[j++] = atoi(ptr++);
     	}
 	}
 	fclose(fp);
+	free(buffer);
+	free(ptr);
 	//*****input txt  Exit*****//  
+	int *data1[2][4];
+	int count[2][4];
+	count[0][0] = (WNUM/4-ArrayLargeCountCompute(data, 0, WNUM/4, WNUM/2));
+	count[1][0] = (ArrayLargeCountCompute(data, 0, WNUM/4, WNUM/2));
+	count[0][1] = (WNUM/4-ArrayLargeCountCompute(data, WNUM/4, WNUM/4*2, WNUM/2));
+	count[1][1] = (ArrayLargeCountCompute(data, WNUM/4, WNUM/4*2, WNUM/2));
+	count[0][2] = (WNUM/4-ArrayLargeCountCompute(data, WNUM/4*2, WNUM/4*3, WNUM/2));
+	count[1][2] = (ArrayLargeCountCompute(data, WNUM/4*2, WNUM/4*3, WNUM/2));
+	count[0][3] = ((WNUM/4+WNUM-WNUM/4*4)-ArrayLargeCountCompute(data, WNUM/4*3, WNUM, WNUM/2));
+	count[1][3] = (ArrayLargeCountCompute(data, WNUM/4*3, WNUM, WNUM/2));
+	
+	data1[0][0] = (int *) malloc(count[0][0]*sizeof(int));
+	data1[1][0] = (int *) malloc(count[1][0]*sizeof(int));
+	data1[0][1] = (int *) malloc(count[0][1]*sizeof(int));
+	data1[1][1] = (int *) malloc(count[1][1]*sizeof(int));
+	data1[0][2] = (int *) malloc(count[0][2]*sizeof(int));
+	data1[1][2] = (int *) malloc(count[1][2]*sizeof(int));
+	data1[0][3] = (int *) malloc(count[0][3]*sizeof(int));
+	data1[1][3] = (int *) malloc(count[1][3]*sizeof(int));
+
+	dataPatition (data, data1[1][0], data1[0][0], 0, WNUM/4, WNUM/2);
+	dataPatition (data, data1[0][1], data1[1][1], WNUM/4, WNUM/4+WNUM/4, WNUM/2);
+	dataPatition (data, data1[0][2], data1[1][2], WNUM/4*2, WNUM/4*2+WNUM/4, WNUM/2);
+	dataPatition (data, data1[0][3], data1[1][3], WNUM/4*3, WNUM, WNUM/2);
+
+    printf(" %d \n排序後的結果: ",data[WNUM/2]);
+    for (i = 0; i <count[0][0]; i++)
+    {
+        printf("%d ", data1[0][0][i]);
+    }
+         printf("\n排序後的結果: ");
+    for (i = 0; i <count[1][0]; i++)
+    {
+        printf("%d ", data1[1][0][i]);
+    }
+         printf("\n排序後的結果: ");
+    for (i = 0; i <count[0][1]; i++)
+    {
+        printf("%d ", data1[0][1][i]);
+    }
+         printf("\n排序後的結果: ");
+    for (i = 0; i <count[1][1]; i++)
+    {
+        printf("%d ", data1[1][1][i]);
+    }
+     printf("\n排序後的結果: ");
+    for (i = 0; i <count[0][2]; i++)
+    {
+        printf("%d ", data1[0][2][i]);
+    }
+         printf("\n排序後的結果: ");
+    for (i = 0; i <count[1][2]; i++)
+    {
+        printf("%d ", data1[1][2][i]);
+    }
+         printf("\n排序後的結果: ");
+    for (i = 0; i <count[0][3]; i++)
+    {
+        printf("%d ", data1[0][3][i]);
+    }
+         printf("\n排序後的結果: ");
+    for (i = 0; i <count[1][3]; i++)
+    {
+        printf("%d ", data1[1][3][i]);
+    }
+
 
     // 執行快速排序法
     //quicksort(data, 0, j - 1);
@@ -111,40 +170,19 @@ void FastQuickSort(int *data, int left, int right)
 	}
 }
 
-void quicksort(int *data, int left, int right) {
-    int pivot, i, j;
-    if (left >= right) { return; }
-    pivot = data[left];
-    i = left + 1;
-    j = right;
-    while (1)
-    {
-        while (i <= right)
-        {
-            if (data[i] > pivot)
-            {
-                break;
-            }
-            i = i + 1;
-        }
-        while (j > left)
-        {
-            if (data[j] < pivot)
-            {
-                break;
-            }
-            j = j - 1;
-        }
-        if (i > j) { break; }
-        swap(&data[i], &data[j]);
-    }
-    swap(&data[left], &data[j]);
-    quicksort(data, left, j - 1);
-    quicksort(data, j + 1, right);
-}
-
 void swap(int *a, int *b) {
     int temp = *a;
     *a = *b;
     *b = temp;
+}
+
+int ArrayLargeCountCompute(int *data, int left, int right, int middle){
+	int count = 0;
+	int l;
+	for(l = left; l < right; l++){
+		if(data[l] > data[middle]){
+			++count;
+		}
+	}
+	return count;
 }
