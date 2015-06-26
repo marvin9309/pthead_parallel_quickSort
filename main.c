@@ -2,9 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define _GNU_SOURCE
-
-void swap(int *a, int *b);
 void fastQuickSort(int *data, int left, int right);
 void dataPartition(int *data, int *data_a, int *data_b, int left, int right, int middle);
 void dataCombination_2in1(int *data, int *data_a, int *data_b, int a, int b);
@@ -15,7 +12,7 @@ int main(void)
 	char* buffer= (char *) malloc(20*sizeof(char));
 	char* ptr= (char *) malloc(20*sizeof(char));
     int i, j=0, l, m, n;
-    static long WNUM, NUM;
+    static int WNUM, NUM;
     
 	//*****input txt  Start*****//    
 	FILE *fp;
@@ -27,7 +24,6 @@ int main(void)
     rewind(fp);
 
     int *data = (int *) malloc(WNUM*sizeof(int));
-    int *buff = (int *) malloc(WNUM/4*sizeof(int));
 
 	while(fgets(buffer, 10, fp)!=NULL) {
     	ptr = buffer; data[j++] = atoi(ptr);
@@ -42,7 +38,7 @@ int main(void)
 	
 	
 	int *data1[2][4];
-	long count[2][4];
+	int count[2][4];
 	
 	count[0][0] = (WNUM/4-arrayLargeCountCompute(data, 0, WNUM/4, WNUM/2));
 	count[1][0] = (arrayLargeCountCompute(data, 0, WNUM/4, WNUM/2));
@@ -70,7 +66,7 @@ int main(void)
 	free(data);
 	
 	int *data2[2];
-	long WNUM1[4];	
+	int WNUM1[4];	
 
 	WNUM1[0] = (count[0][0]+count[0][2]);
 	WNUM1[1] = (count[0][1]+count[0][3]);
@@ -93,7 +89,7 @@ int main(void)
 	free(data1[1][3]);
 
 	int *data3[2][4];
-	long count1[2][4];	
+	int count1[2][4];	
 	
 	count1[0][0] = ((WNUM1[0]+WNUM1[1])/2-arrayLargeCountCompute(data2[0], 0, (WNUM1[0]+WNUM1[1])/2, (WNUM1[0]+WNUM1[1])/2));
 	count1[0][1] = (arrayLargeCountCompute(data2[0], 0, (WNUM1[0]+WNUM1[1])/2, (WNUM1[0]+WNUM1[1])/2));
@@ -126,7 +122,7 @@ int main(void)
 	free(data2[1]);
 	
 	int *data4[4];
-	long WNUM2[4];	
+	int WNUM2[4];	
 
 	WNUM2[0] = (count1[0][0]+count1[0][2]);
 	WNUM2[1] = (count1[0][1]+count1[0][3]);
@@ -158,30 +154,29 @@ int main(void)
     free(data3[1][3]);	
 		   
    	FILE *fw;
-    int u;
+    int x, u, v, w;
     if((fw=fopen("result.txt","w"))!=NULL)
     {
-        for(u=0;u<WNUM2[0];u++)
+        for(i=0;i<WNUM2[0];i++)
         {
-           fprintf(fw,"%d\n", data4[0][u]);
+           fprintf(fw,"%d\n", data4[0][i]);
         }   
-        for(u=0;u<WNUM2[1];u++)
+        for(i=0;i<WNUM2[1];i++)
         {
-           fprintf(fw,"%d\n", data4[1][u]);
+           fprintf(fw,"%d\n", data4[1][i]);
         }  
-        for(u=0;u<WNUM2[2];u++)
+        for(i=0;i<WNUM2[2];i++)
         {
-           fprintf(fw,"%d\n", data4[2][u]);
+           fprintf(fw,"%d\n", data4[2][i]);
         }  
-        for(u=0;u<WNUM2[3];u++)
+        for(i=0;i<WNUM2[3];i++)
         {
-           fprintf(fw,"%d\n", data4[3][u]);
+           fprintf(fw,"%d\n", data4[3][i]);
         }  
     }
     fclose(fw);
     //*****output txt  Exit*****//
     
-    //system("pause");
 }
 
 void fastQuickSort(int *data, int left, int right)
@@ -202,12 +197,6 @@ void fastQuickSort(int *data, int left, int right)
 		fastQuickSort(data, left, i-1); // 對左邊進行遞迴
 		fastQuickSort(data, j+1, right); // 對右邊進行遞迴
 	}
-}
-
-void swap(int *a, int *b) {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
 }
 
 int arrayLargeCountCompute(int *data, int left, int right, int middle){
@@ -255,10 +244,10 @@ void dataCombination_4in1(int *data, int *data_a, int *data_b, int *data_c, int 
 	for( p = 0; p < b; p++){
 		data[t++] = data_b[p];
 	}
-	for( p = 0; p < c; p++){
-		data[t++] = data_c[p];
+	for( r = 0; r < c; r++){
+		data[t++] = data_c[r];
 	}
-	for( p = 0; p < d; p++){
-		data[t++] = data_d[p];
+	for( s = 0; s < d; s++){
+		data[t++] = data_d[s];
 	}
 }
