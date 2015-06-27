@@ -1,42 +1,73 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 void fastQuickSort(int *data, int left, int right);
 void dataPartition(int *data, int *data_a, int *data_b, int left, int right, int middle);
 void dataCombination_2in1(int *data, int *data_a, int *data_b, int a, int b);
 void dataCombination_4in1(int *data, int *data_a, int *data_b, int *data_c, int *data_d, int a, int b, int c, int d);
 int arrayLargeCountCompute(int *data, int left, int right, int middle);
+enum {LINE_CNT = 150, BUF_SIZE = 40};
+int getNumOfLinesInFile(char* filename);
+
 int main(void)
 {
 	char* buffer= (char *) malloc(20*sizeof(char));
 	char* ptr= (char *) malloc(20*sizeof(char));
-    int i, j=0, l, m, n;
-    static int WNUM, NUM;
+    int i, j=0, l, m, n,lo=0;
+    static int WNUM;
+    char name[]= "input.txt";
+    
+    pthread_t thread[4] ;
     
 	//*****input txt  Start*****//    
-	FILE *fp;
-    fp=fopen("input.txt","r");
+	FILE *fa;
+	
+	char *line = NULL;
+    size_t len = 0;
+    size_t read;
     
-  	while(fgets(buffer, 10, fp)!=NULL) ++WNUM;
-  	
-	NUM = WNUM;
-    rewind(fp);
+    fa=fopen(name,"r");
+    /*
+  	while(fgets(buffer, 10, fa)!=NULL) ++WNUM;
+  	printf("%d\n", getNumOfLinesInFile(name));
+	*/
+  	WNUM = getNumOfLinesInFile(name);
+    rewind(fa); 
 
     int *data = (int *) malloc(WNUM*sizeof(int));
-
+	/*
 	while(fgets(buffer, 10, fp)!=NULL) {
-    	ptr = buffer; data[j++] = atoi(ptr);
+    	ptr = buffer; data[j++] = atoi(ptr++);
     	while( (ptr = strchr(ptr, ' '))!=NULL && *(ptr+1)!='\n') {
       	 	data[j++] = atoi(ptr++);
     	}
 	}
-	fclose(fp);
+	*/
+
+	while (fscanf(fa, "%s",ptr)!=EOF){ 
+	data[lo]=atoi(ptr);
+	lo++;
+   }
+  
+  	/*
+  	for (i=0; i<WNUM; i++) {
+        read = getline(&line, &len, fa);
+        data[i] = atoi(line);
+    } 
+	*/
+	fclose(fa);
 	free(buffer);
 	free(ptr);
+	/*
+	for(i=0;i<WNUM;i++)
+    {
+		printf("%d\n", data[i]);	   
+   	}*/
 	//*****input txt  Exit*****//  
-	
-	
+
+
 	int *data1[2][4];
 	int count[2][4];
 	
@@ -109,10 +140,6 @@ int main(void)
 	data3[1][2] = (int *) malloc(count1[1][2]*sizeof(int));
 	data3[1][3] = (int *) malloc(count1[1][3]*sizeof(int));
 
-	int o = 0, p = 0;
-	int q;
-	
-
 	dataPartition(data2[0], data3[0][0], data3[0][1], 0, (WNUM1[0]+WNUM1[1])/2, (WNUM1[0]+WNUM1[1])/2);
 	dataPartition(data2[0], data3[0][2], data3[0][3], (WNUM1[0]+WNUM1[1])/2, (WNUM1[0]+WNUM1[1]), (WNUM1[0]+WNUM1[1])/2);
 	dataPartition(data2[1], data3[1][0], data3[1][1], 0, (WNUM1[2]+WNUM1[3])/2, (WNUM1[2]+WNUM1[3])/2);
@@ -152,9 +179,9 @@ int main(void)
     free(data3[1][1]);
     free(data3[1][2]);
     free(data3[1][3]);	
-		   
-   	FILE *fw;
-    int x, u, v, w;
+    
+	   FILE *fw;
+
     if((fw=fopen("result.txt","w"))!=NULL)
     {
         for(i=0;i<WNUM2[0];i++)
@@ -236,18 +263,43 @@ void dataCombination_2in1(int *data, int *data_a, int *data_b, int a, int b){
 }
 
 void dataCombination_4in1(int *data, int *data_a, int *data_b, int *data_c, int *data_d, int a, int b, int c, int d){
-	int o ,p ,r ,s;
+	int o;
 	int t = 0;
 	for( o = 0; o < a; o++){
 		data[t++] = data_a[o];
 	}
-	for( p = 0; p < b; p++){
-		data[t++] = data_b[p];
+	for( o = 0; o < b; o++){
+		data[t++] = data_b[o];
 	}
-	for( r = 0; r < c; r++){
-		data[t++] = data_c[r];
+	for( o = 0; o < c; o++){
+		data[t++] = data_c[o];
 	}
-	for( s = 0; s < d; s++){
-		data[t++] = data_d[s];
+	for( o = 0; o < d; o++){
+		data[t++] = data_d[o];
 	}
+}
+
+int getNumOfLinesInFile(char* filename){
+    FILE *fp;
+    int numOfLines = 0;
+    char ch;
+    char buf[BUF_SIZE+1] ;
+    char * ptr;
+    size_t read_bytes;
+    
+    fp = fopen(filename, "r");
+    if(fp == NULL){
+        printf("Error: Can not open %s.\n", filename);
+        return 1;
+    }
+    while((read_bytes = fread(buf, 1, BUF_SIZE, fp))) { // read_bytes==0 時結束
+        buf[read_bytes] = '\0';
+        ptr = (char*)strchr(buf, '\n');
+        while(ptr!=NULL) {
+            numOfLines++;
+            ptr = (char*)strchr(ptr+1, '\n');
+        }
+    }
+    fclose(fp);
+    return numOfLines; //使用fread，會少讀最後一行，若檔案無最後一行空白的話。
 }
