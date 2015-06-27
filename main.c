@@ -9,17 +9,75 @@ void dataCombination_2in1(int *data, int *data_a, int *data_b, int a, int b);
 void dataCombination_4in1(int *data, int *data_a, int *data_b, int *data_c, int *data_d, int a, int b, int c, int d);
 int arrayLargeCountCompute(int *data, int left, int right, int middle);
 enum {LINE_CNT = 150, BUF_SIZE = 40};
+
 int getNumOfLinesInFile(char* filename);
+
+
+struct DataPart{
+	int *data;
+	int *data_a;
+	int *data_b;
+	int left;
+	int right;
+	int middle;
+}part[4];
+
+struct DataQuickSort{
+	int *data;
+	int left;
+	int right;
+}sort[4];
+
+struct DataCombine_2in1{
+	int *data;
+	int *data_a;
+	int *data_b;
+	int a;
+	int b;
+}combine_2in1[4];
+
+struct DataCombine_4in1{
+	int *data;
+	int *data_a;
+	int *data_b;
+	int *data_c;
+	int *data_d;
+	int a;
+	int b;
+	int c;
+	int d;
+}combine_4in1[2];
+
+void* threadPartition(struct DataPart* part){	
+	dataPartition(part->data, part->data_a, part->data_b, part->left, part->right, part->middle);
+	pthread_exit(NULL);
+}
+
+void* threadQuickSort(struct DataQuickSort* sort){	
+	fastQuickSort(sort->data, sort->left, sort->right);
+	pthread_exit(NULL);
+}
+
+void* threadCombination_2in1(struct DataCombine_2in1* combine_2in1){	
+	dataCombination_2in1(combine_2in1->data, combine_2in1->data_a, combine_2in1->data_b, combine_2in1->a, combine_2in1->b);
+	pthread_exit(NULL);
+}
+
+void* threadCombination_4in1(struct DataCombine_4in1* combine_4in1){	
+	dataCombination_4in1(combine_4in1->data, combine_4in1->data_a, combine_4in1->data_b, combine_4in1->data_c, combine_4in1->data_d, combine_4in1->a, combine_4in1->b, combine_4in1->c, combine_4in1->d);
+	pthread_exit(NULL);
+}
 
 int main(void)
 {
 	char* buffer= (char *) malloc(20*sizeof(char));
 	char* ptr= (char *) malloc(20*sizeof(char));
-    int i, j=0, l, m, n,lo=0;
+    int i, j=0, l, m, n, lo=0;
     static int WNUM;
     char name[]= "input.txt";
     
     pthread_t thread[4] ;
+    int ret;
     
 	//*****input txt  Start*****//    
 	FILE *fa;
@@ -88,11 +146,57 @@ int main(void)
 	data1[1][2] = (int *) malloc(count[1][2]*sizeof(int));
 	data1[0][3] = (int *) malloc(count[0][3]*sizeof(int));
 	data1[1][3] = (int *) malloc(count[1][3]*sizeof(int));
-
-	dataPartition(data, data1[0][0], data1[1][0], 0, WNUM/4, WNUM/2);
-	dataPartition(data, data1[0][1], data1[1][1], WNUM/4, WNUM/4+WNUM/4, WNUM/2);
-	dataPartition(data, data1[0][2], data1[1][2], WNUM/4+WNUM/4, WNUM/4+WNUM/4+WNUM/4, WNUM/2);
-	dataPartition(data, data1[0][3], data1[1][3], WNUM/4+WNUM/4+WNUM/4, WNUM, WNUM/2);
+	
+	for(i = 0; i < 4; i++){
+		switch(i){
+			case 0:{
+				part[i].data = data;
+				part[i].data_a = data1[0][0];
+				part[i].data_b = data1[1][0];
+				part[i].left = 0;
+				part[i].right = WNUM/4;
+				part[i].middle = WNUM/2;
+				break;
+			}
+			case 1:{
+				part[i].data = data;
+				part[i].data_a = data1[0][1];
+				part[i].data_b = data1[1][1];
+				part[i].left = WNUM/4;
+				part[i].right = WNUM/4+WNUM/4;
+				part[i].middle = WNUM/2;
+				break;
+			}
+			case 2:{
+				part[i].data = data;
+				part[i].data_a = data1[0][2];
+				part[i].data_b = data1[1][2];
+				part[i].left = WNUM/4+WNUM/4;
+				part[i].right = WNUM/4+WNUM/4+WNUM/4;
+				part[i].middle = WNUM/2;
+				break;
+			}
+			case 3:{
+				part[i].data = data;
+				part[i].data_a = data1[0][3];
+				part[i].data_b = data1[1][3];
+				part[i].left =  WNUM/4+WNUM/4+WNUM/4;
+				part[i].right = WNUM;
+				part[i].middle = WNUM/2;
+				break;
+			}
+		}
+		ret = pthread_create(&thread[i],NULL,threadPartition,&part[i]);
+		if(ret!=0)
+		{
+			printf ("Create pthread error!\n");
+			exit (1);
+		}
+	}
+	pthread_join(thread[0],NULL);
+	pthread_join(thread[1],NULL);
+	pthread_join(thread[2],NULL);
+	pthread_join(thread[3],NULL);
 	
 	free(data);
 	
@@ -107,8 +211,29 @@ int main(void)
 	data2[0] = (int *) malloc((WNUM1[0]+WNUM1[1])*sizeof(int));
 	data2[1] = (int *) malloc((WNUM1[2]+WNUM1[3])*sizeof(int));
 	
-	dataCombination_4in1(data2[0], data1[0][0], data1[0][2], data1[0][1], data1[0][3], count[0][0], count[0][2], count[0][1], count[0][3]);
-	dataCombination_4in1(data2[1], data1[1][0], data1[1][2], data1[1][1], data1[1][3], count[1][0], count[1][2], count[1][1], count[1][3]);
+	for(i = 0; i < 2; i++){
+
+		combine_4in1[i].data = data2[i];
+		combine_4in1[i].data_a = data1[i][0];
+		combine_4in1[i].data_b = data1[i][2];
+		combine_4in1[i].data_c = data1[i][1];
+		combine_4in1[i].data_d = data1[i][3];
+		combine_4in1[i].a = count[i][0];
+		combine_4in1[i].b = count[i][2];
+		combine_4in1[i].c = count[i][1];
+		combine_4in1[i].d = count[i][3];
+		
+		ret = pthread_create(&thread[i],NULL,threadCombination_4in1,&combine_4in1[i]);
+		if(ret!=0)
+		{
+			printf ("Create pthread error!\n");
+			exit (1);
+		}
+	}
+	pthread_join(thread[0],NULL);
+	pthread_join(thread[1],NULL);
+	pthread_join(thread[2],NULL);
+	pthread_join(thread[3],NULL);
 	
 	free(data1[0][0]);
 	free(data1[0][1]);
@@ -140,10 +265,56 @@ int main(void)
 	data3[1][2] = (int *) malloc(count1[1][2]*sizeof(int));
 	data3[1][3] = (int *) malloc(count1[1][3]*sizeof(int));
 
-	dataPartition(data2[0], data3[0][0], data3[0][1], 0, (WNUM1[0]+WNUM1[1])/2, (WNUM1[0]+WNUM1[1])/2);
-	dataPartition(data2[0], data3[0][2], data3[0][3], (WNUM1[0]+WNUM1[1])/2, (WNUM1[0]+WNUM1[1]), (WNUM1[0]+WNUM1[1])/2);
-	dataPartition(data2[1], data3[1][0], data3[1][1], 0, (WNUM1[2]+WNUM1[3])/2, (WNUM1[2]+WNUM1[3])/2);
-	dataPartition(data2[1], data3[1][2], data3[1][3], (WNUM1[2]+WNUM1[3])/2, (WNUM1[2]+WNUM1[3]), (WNUM1[2]+WNUM1[3])/2);
+	for(i = 0; i < 4; i++){
+		switch(i){
+			case 0:{
+				part[i].data = data2[0];
+				part[i].data_a = data3[0][0];
+				part[i].data_b = data3[0][1];
+				part[i].left = 0;
+				part[i].right = (WNUM1[0]+WNUM1[1])/2;
+				part[i].middle = (WNUM1[0]+WNUM1[1])/2;
+				break;
+			}
+			case 1:{
+				part[i].data = data2[0];
+				part[i].data_a = data3[0][2];
+				part[i].data_b = data3[0][3];
+				part[i].left = (WNUM1[0]+WNUM1[1])/2;
+				part[i].right = (WNUM1[0]+WNUM1[1]);
+				part[i].middle = (WNUM1[0]+WNUM1[1])/2;
+				break;
+			}
+			case 2:{
+				part[i].data = data2[1];
+				part[i].data_a = data3[1][0];
+				part[i].data_b = data3[1][1];
+				part[i].left = 0;
+				part[i].right = (WNUM1[2]+WNUM1[3])/2;
+				part[i].middle = (WNUM1[2]+WNUM1[3])/2;
+				break;
+			}
+			case 3:{
+				part[i].data = data2[1];
+				part[i].data_a = data3[1][2];
+				part[i].data_b = data3[1][3];
+				part[i].left =  (WNUM1[2]+WNUM1[3])/2;
+				part[i].right = (WNUM1[2]+WNUM1[3]);
+				part[i].middle = (WNUM1[2]+WNUM1[3])/2;
+				break;
+			}
+		}
+		ret = pthread_create(&thread[i],NULL,threadPartition,&part[i]);
+		if(ret!=0)
+		{
+			printf ("Create pthread error!\n");
+			exit (1);
+		}
+	}
+	pthread_join(thread[0],NULL);
+	pthread_join(thread[1],NULL);
+	pthread_join(thread[2],NULL);
+	pthread_join(thread[3],NULL);
 	
 	free(data2[0]);
 	free(data2[1]);
@@ -161,15 +332,43 @@ int main(void)
 	data4[2] = (int *) malloc(WNUM2[2]*sizeof(int));
 	data4[3] = (int *) malloc(WNUM2[3]*sizeof(int));	
 	
-	dataCombination_2in1(data4[0], data3[0][0], data3[0][2], count1[0][0], count1[0][2]);
-	dataCombination_2in1(data4[1], data3[0][1], data3[0][3], count1[0][1], count1[0][3]);	
-	dataCombination_2in1(data4[2], data3[1][0], data3[1][2], count1[1][0], count1[1][2]);
-	dataCombination_2in1(data4[3], data3[1][1], data3[1][3], count1[1][1], count1[1][3]);
+	for(i = 0; i < 4; i++){
 
-	fastQuickSort(data4[0], 0, WNUM2[0]-1);
-	fastQuickSort(data4[1], 0, WNUM2[1]-1);
-	fastQuickSort(data4[2], 0, WNUM2[2]-1);
-	fastQuickSort(data4[3], 0, WNUM2[3]-1);
+		combine_2in1[i].data = data4[i];
+		combine_2in1[i].data_a = data3[i/2][i%2];
+		combine_2in1[i].data_b = data3[i/2][i%2+2];
+		combine_2in1[i].a = count1[i/2][i%2];
+		combine_2in1[i].b = count1[i/2][i%2+2];
+		
+		ret = pthread_create(&thread[i],NULL,threadCombination_2in1,&combine_2in1[i]);
+		if(ret!=0)
+		{
+			printf ("Create pthread error!\n");
+			exit (1);
+		}
+	}
+	pthread_join(thread[0],NULL);
+	pthread_join(thread[1],NULL);
+	pthread_join(thread[2],NULL);
+	pthread_join(thread[3],NULL);
+
+	for(i = 0; i < 4; i++){
+
+		sort[i].data = data4[i];
+		sort[i].left = 0;
+		sort[i].right = WNUM2[i]-1;
+			
+		ret = pthread_create(&thread[i],NULL,threadQuickSort,&sort[i]);
+		if(ret!=0)
+		{
+			printf ("Create pthread error!\n");
+			exit (1);
+		}
+	}
+	pthread_join(thread[0],NULL);
+	pthread_join(thread[1],NULL);
+	pthread_join(thread[2],NULL);
+	pthread_join(thread[3],NULL);
 
     free(data3[0][0]);
     free(data3[0][1]);
