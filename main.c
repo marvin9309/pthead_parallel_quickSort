@@ -68,7 +68,7 @@ void* threadCombination_4in1(struct DataCombine_4in1* combine_4in1){
 	pthread_exit(NULL);
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	char* buffer= (char *) malloc(20*sizeof(char));
 	char* ptr= (char *) malloc(20*sizeof(char));
@@ -76,7 +76,7 @@ int main(void)
     static int WNUM;
     char name[]= "input.txt";
     
-    pthread_t thread[4] ;
+    pthread_t thread[4];
     int ret;
     
 	//*****input txt  Start*****//    
@@ -86,35 +86,35 @@ int main(void)
     size_t len = 0;
     size_t read;
     
-    fa=fopen(name,"r");
+    fa=fopen(argv[1],"r");
     /*
   	while(fgets(buffer, 10, fa)!=NULL) ++WNUM;
   	printf("%d\n", getNumOfLinesInFile(name));
 	*/
-  	WNUM = getNumOfLinesInFile(name);
+  	WNUM = getNumOfLinesInFile(argv[1]);
     rewind(fa); 
 
     int *data = (int *) malloc(WNUM*sizeof(int));
 	/*
-	while(fgets(buffer, 10, fp)!=NULL) {
-    	ptr = buffer; data[j++] = atoi(ptr++);
+	while(fgets(buffer, 10, fa)!=NULL) {
+    	ptr = buffer; data[j++] = atoi(ptr);
     	while( (ptr = strchr(ptr, ' '))!=NULL && *(ptr+1)!='\n') {
-      	 	data[j++] = atoi(ptr++);
+      	 	data[j] = atoi(ptr++);
     	}
 	}
 	*/
-
+	/*
 	while (fscanf(fa, "%s",ptr)!=EOF){ 
 	data[lo]=atoi(ptr);
 	lo++;
    }
-  
-  	/*
-  	for (i=0; i<WNUM; i++) {
+  	*/
+  	
+  	for (lo=0; lo<WNUM; lo++) {
         read = getline(&line, &len, fa);
-        data[i] = atoi(line);
+        data[lo] = atoi(line);
     } 
-	*/
+	
 	fclose(fa);
 	free(buffer);
 	free(ptr);
@@ -381,7 +381,7 @@ int main(void)
     
 	   FILE *fw;
 
-    if((fw=fopen("result.txt","w"))!=NULL)
+    if((fw=fopen(argv[2],"w"))!=NULL)
     {
         for(i=0;i<WNUM2[0];i++)
         {
