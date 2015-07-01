@@ -413,15 +413,15 @@ void fastQuickSort(int *data, int left, int right)
 		i = left - 1;
 		j = right + 1;
 		while(1) {
-			while(data[++i] < s) ; // ¦V¥k§ä
-			while(data[--j] > s) ; // ¦V¥ª§ä
+			while(data[++i] < s) ; // å‘å³æ‰¾
+			while(data[--j] > s) ; // å‘å·¦æ‰¾
 			if(i >= j) break;
 			Temp = data[i];
 			data[i] = data[j];
 			data[j] = Temp;
 		}
-		fastQuickSort(data, left, i-1); // ¹ï¥ªÃä¶i¦æ»¼°j
-		fastQuickSort(data, j+1, right); // ¹ï¥kÃä¶i¦æ»¼°j
+		fastQuickSort(data, left, i-1); // å°å·¦é‚Šé€²è¡Œéè¿´
+		fastQuickSort(data, j+1, right); // å°å³é‚Šé€²è¡Œéè¿´
 	}
 }
 
@@ -491,7 +491,7 @@ int getNumOfLinesInFile(char* filename){
         printf("Error: Can not open %s.\n", filename);
         return 1;
     }
-    while((read_bytes = fread(buf, 1, BUF_SIZE, fp))) { // read_bytes==0 ®Éµ²§ô
+    while((read_bytes = fread(buf, 1, BUF_SIZE, fp))) { // read_bytes==0 æ™‚çµæŸ
         buf[read_bytes] = '\0';
         ptr = (char*)strchr(buf, '\n');
         while(ptr!=NULL) {
@@ -500,5 +500,5 @@ int getNumOfLinesInFile(char* filename){
         }
     }
     fclose(fp);
-    return numOfLines; //¨Ï¥Îfread¡A·|¤ÖÅª³Ì«á¤@¦æ¡A­YÀÉ®×µL³Ì«á¤@¦æªÅ¥Õªº¸Ü¡C
+    return numOfLines+1; //ä½¿ç”¨freadï¼Œæœƒå°‘è®€æœ€å¾Œä¸€è¡Œï¼Œè‹¥æª”æ¡ˆç„¡æœ€å¾Œä¸€è¡Œç©ºç™½çš„è©±ã€‚
 }
